@@ -75,7 +75,7 @@
 			<a href="/viewOrder">View Order</a>
 		</button>
 		<button class="order-btn">
-			<a href="?action=RESET_ORDER">Reset Order</a>
+			<a href="/resetOrder">Reset Order</a>
 		</button>
 	</footer>
 

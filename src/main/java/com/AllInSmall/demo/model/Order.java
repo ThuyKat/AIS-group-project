@@ -1,4 +1,5 @@
 package com.AllInSmall.demo.model;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -30,7 +31,7 @@ private int id;
 @Enumerated(EnumType.STRING) // if not specify, default will be ordinal 0,1,2
 private OrderStatus status;
 
-private Date date;
+private LocalDateTime date;
 
 @Column(name="total_Price")
 private float totalPrice;
@@ -46,9 +47,11 @@ private User user;
 
 
 public void reset() {
+	if(this.orderDetails != null) {
 	this.status = null;
-	this.orderDetails = new HashSet<>();
+	this.orderDetails.clear();
 	this.totalPrice = 0;
+	}
 }
 
 

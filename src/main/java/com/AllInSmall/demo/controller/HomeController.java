@@ -69,6 +69,11 @@ public class HomeController {
 
 	@GetMapping("/viewOrder")
 	public String viewOrder(Model model) {
+		Set<OrderDetail> orderDetails = sessionOrder.getOrderDetails();
+		double totalPrice = orderDetails.stream().mapToDouble(od -> od.getQuantity() * od.getProduct().getPrice())
+			    .sum();
+		float roundedTotal = 	Math.round(totalPrice * 100) / 100;
+		sessionOrder.setTotalPrice(roundedTotal);
 		model.addAttribute("order", sessionOrder);
 		return "viewOrder";
 
@@ -77,9 +82,14 @@ public class HomeController {
 	@GetMapping("/resetOrder")
 	public ResponseEntity<String> resetOrder() {
 		// clear the session-scoped Order bean
+		try {
 		sessionOrder.reset();
 		String message = "Order is reset" + sessionOrder.getOrderDetails().toString();
-		return ResponseEntity.ok(message);
+		return ResponseEntity.ok(message);}
+		catch(Exception e){
+			e.printStackTrace();
+			return ResponseEntity.ok("unable to reset");
+		}
 	}
 
 	// NEED JAVA SCRIPT TO CAPTURE PRODUCT ID AND QUANTITY INTO MAP<INTEGER,INTEGER>
