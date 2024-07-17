@@ -22,7 +22,7 @@ import lombok.ToString;
 public class Product {
 @Id
 @GeneratedValue(strategy = GenerationType.IDENTITY)
-private int id;
+private Integer id;
 
 @Column(name="image_name")
 private String imageName;

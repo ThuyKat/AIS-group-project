@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import com.AllInSmall.demo.exception.ProductNotFoundException;
 import com.AllInSmall.demo.model.Category;
 import com.AllInSmall.demo.model.Order;
 import com.AllInSmall.demo.model.OrderDetail;
@@ -93,78 +95,77 @@ public class HomeController {
 				int quantity = orderItem.getValue();
 
 				// find the product in DB by productId
-				Product product = productRepository.findById(productId);
+//				Product product = productRepository.findById(productId);
+				Product product = productRepository.findById(productId)
+					    .orElseThrow(() -> new ProductNotFoundException("Product not found"));
+				
+//				OTHER OPTON: 
+//
+//		            Product product = productRepository.findById(productId)
+//		                .orElse(null);
+//
+//		            if (product == null) {
+				        //print message..
+//		                continue; // Skip this item and move to the next
+//		            }
 
-				Set<OrderDetail> sessionSetOfOrderDetails = sessionOrder.getOrderDetails();
-				// product is found, check if sessionOrder has any orderDetails
-				if (product != null) {
-					if (sessionSetOfOrderDetails == null) {
-						sessionOrder.setOrderDetails(new HashSet<>());
-						// Create OrderDetailKey
-						OrderDetailKey orderDetailKey = new OrderDetailKey(sessionOrder.getId(), productId);
-
-						// new order and orderDetail instance
-
-						OrderDetail orderDetail = new OrderDetail();
-						// build orderDetail
-						orderDetail = OrderDetail.builder().id(orderDetailKey) // Set the composite key
-								.product(product).quantity(quantity).order(sessionOrder).createdBy("thuy")
-								.createdDate(LocalDateTime.now()).build();
-
-						// add orderDetail to order
-
-						// Add the new OrderDetail
-						sessionOrder.getOrderDetails().add(orderDetail);
-
-					} else {
-						// check if the product has already in sessionOrder.getOrderDetails
-						boolean productInOrderDetail = false;
-						for (OrderDetail orderDetail : sessionSetOfOrderDetails) {
-							if (orderDetail.getProduct().getId() == productId) {
-								Integer updatedQuantity = orderDetail.getQuantity() + quantity;
-								orderDetail.setQuantity(updatedQuantity);
-								productInOrderDetail = true;
-								break;
-
-							}
-						}
-
-						if (productInOrderDetail == false) {
-							// if the product is not in any orderDetail of the session
-							// initiate a new OrderDetail and add it to the sessionOrder
-
-							// Create OrderDetailKey
-							OrderDetailKey orderDetailKey = new OrderDetailKey(sessionOrder.getId(), productId);
-
-							// new order and orderDetail instance
-
-							OrderDetail orderDetail = new OrderDetail();
-							// build orderDetail
-							orderDetail = OrderDetail.builder().id(orderDetailKey) // Set the composite key
-									.product(product).quantity(quantity).order(sessionOrder).createdBy("thuy")
-									.createdDate(LocalDateTime.now()).build();
-
-							// add orderDetail to order
-
-							// Add the new OrderDetail
-							sessionOrder.getOrderDetails().add(orderDetail);
-
-						}
-
-					}
+				updateOrCreateOrderDetail(product,quantity);
 					// product is not found
-				} else {
-					return ResponseEntity.ok("Nothing is added, no product is found");
-				}
+				
+//				else {
+//					return ResponseEntity.ok("Nothing is added, no product is found");
+//				} // replace with exception handling
 			}
+			String message = "successfully added : " + sessionOrder.getOrderDetails().toString();
+			
+			return ResponseEntity.ok(message);
+			
 
 		} catch (Exception e) {
 			e.printStackTrace();
 			return ResponseEntity.ok("Nothing is added");
 		}
-		String message = "successfully added : " + sessionOrder.getOrderDetails().toString();
 		
-		return ResponseEntity.ok(message);
 	}
 
-}
+	private void updateOrCreateOrderDetail(Product product, int quantity) {
+		Set<OrderDetail> orderDetails = sessionOrder.getOrderDetails();
+		// product is found, check if sessionOrder has any orderDetails
+		
+			if (orderDetails == null) {
+				orderDetails = new HashSet<>();
+				sessionOrder.setOrderDetails(new HashSet<>());
+			}
+			
+				
+			//find the existing orderDetail in orderDetails that contains the selected product
+			OrderDetail existingOrderDetail = orderDetails.stream().filter(od -> od.getProduct().getId().equals(product.getId()))
+			        .findAny()
+			        .orElse(null);
+			//if the existing orderDetail is not found
+			if(existingOrderDetail == null) {
+				
+				// Create OrderDetailKey
+				OrderDetailKey orderDetailKey = new OrderDetailKey(sessionOrder.getId(), product.getId());
+
+				// new order and orderDetail instance
+
+				OrderDetail orderDetail = new OrderDetail();
+				// build orderDetail
+				orderDetail = OrderDetail.builder().id(orderDetailKey) // Set the composite key
+						.product(product).quantity(quantity).order(sessionOrder).createdBy("thuy")
+						.createdDate(LocalDateTime.now()).build();
+
+				// Add the new OrderDetail
+				sessionOrder.getOrderDetails().add(orderDetail);
+
+			} else {
+				Integer updatedQuantity = existingOrderDetail.getQuantity() + quantity;
+						
+				existingOrderDetail.setQuantity(updatedQuantity);
+
+				}
+			}
+	}
+
+
