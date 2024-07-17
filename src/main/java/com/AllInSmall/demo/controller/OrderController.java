@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.AllInSmall.demo.model.Order;
 import com.AllInSmall.demo.model.OrderDetail;
-import com.AllInSmall.demo.model.OrderStatus;
+import com.AllInSmall.demo.enums.OrderStatus;
 import com.AllInSmall.demo.repository.OrderDetailRepository;
 import com.AllInSmall.demo.repository.OrderRepository;
 
@@ -32,7 +32,7 @@ public class OrderController {
 			orderDetailRepository.save(orderDetail);
 		}
 		
-		order.setStatus(OrderStatus.placed);
+		order.setStatus(OrderStatus.PLACED);
 		orderRepository.save(order);
 		
 		// Redirect to the listOrder page with a query parameter

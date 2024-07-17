@@ -11,11 +11,13 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data // this to generate getter, setter, toString and hashcode, equals
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity // for mapping to db 
+@ToString(exclude= {"category","orderDetails"})
 @Table(name="products")
 public class Product {
 @Id

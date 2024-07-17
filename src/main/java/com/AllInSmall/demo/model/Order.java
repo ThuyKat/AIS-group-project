@@ -1,8 +1,11 @@
 package com.AllInSmall.demo.model;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import com.AllInSmall.demo.enums.OrderStatus;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -12,11 +15,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
-@Entity
-@Table(name="orders")
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity
+@Table(name="orders")
 public class Order {
 
 @Id
@@ -33,7 +37,7 @@ private float totalPrice;
 
 @OneToMany(mappedBy ="order") //name of object Order in OrderDetail
 @JsonManagedReference
-private List<OrderDetail> orderDetails;
+private Set<OrderDetail> orderDetails;
 
 @ManyToOne
 @JoinColumn(name="user_id")
@@ -43,7 +47,10 @@ private User user;
 
 public void reset() {
 	this.status = null;
-	this.orderDetails = new ArrayList<>();
+	this.orderDetails = new HashSet<>();
 	this.totalPrice = 0;
 }
+
+
+
 }
